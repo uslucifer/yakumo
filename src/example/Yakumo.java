@@ -21,62 +21,35 @@ import java.util.logging.Logger;
  * @author Aleksei Nezhnov
  */
 public class Yakumo {
-    Hashtable <String,Hashtable<String,String>> main_library;
+    Hashtable <String,Vector<String>> main_library;
     Hashtable <String, String> reaction;
     String filename = "data\\main_lib.dat";
-    String echo; // эхо, последнее множество на входе
-    boolean reaction_flag;
-    private String session;
-    boolean last_multiude; 
    public Yakumo() 
     {
-        main_library = new Hashtable <String,Hashtable<String, String>>();
-        reaction = new Hashtable <String, String>();
-        reaction_flag = true;
-        last_multiude = false;
-        session="";
-        echo ="";
+       main_library = new Hashtable<String,Vector<String>>();
     }
     void addMultitude(String multitude)
     {// добавляет библиотеку новым множеством
         String key = multitude.length()+"";// формируем ключ
-        echo = multitude;//  формируем эхо множество
         if(main_library.containsKey(key))
         {
-            Hashtable<String,String> mul = main_library.get(key);
-            if(!mul.containsKey(multitude))// если множество неизвестно
+            Vector<String> v_multitude = main_library.get(key);
+            if(!v_multitude.contains(multitude))// если множество неизвестно
             {
-                mul.put(multitude,"serial");
-                main_library.put(key, mul);
-                reaction_flag = false; // реакция на неизвестное множество - интерес
-            }else{// если множество найдено
-                reaction_flag = true; // реакция на неизвестное множество - отсутствие интереса
+                v_multitude.add(multitude);
+                main_library.put(key, v_multitude);
+            }else{
             }
+        }else{
+            Vector<String> v_multitude = new Vector<String>();
+                v_multitude.add(multitude);
+            main_library.put(key, v_multitude);
         }
-        else
-        {//создаем новый ключ
-            Hashtable<String,String> mul = new  Hashtable<String,String>();
-            mul.put(multitude,"serial");
-            main_library.put(key, mul);
-        }   
-        if(!last_multiude)// дописывать если сессия не завершается
-        {
-            if(session=="")
-            {
-                session=getSession()+echo;//  если первое множество в сессии
-            }
-            else
-            {
-                session=getSession()+"."+echo;
-            }
         
-        }
     }
     void saveLibary()
     {   try {
         // сохраняет объект библиотеки в файл
-            last_multiude = true;
-                addMultitude(getSession());
                 
         FileOutputStream file_output = new FileOutputStream(filename);
                 ObjectOutputStream output_object = new ObjectOutputStream(file_output);
@@ -94,7 +67,7 @@ public class Yakumo {
         // загружает состояние библиотеки из файла
         FileInputStream input_stream = new FileInputStream(filename);
                 ObjectInputStream input_object = new ObjectInputStream(input_stream);
-                main_library =  (Hashtable<String, Hashtable<String, String>>) input_object.readObject();
+                main_library =    (Hashtable<String, Vector<String>>) input_object.readObject();
                 
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Yakumo.class.getName()).log(Level.SEVERE, null, ex);
@@ -116,15 +89,5 @@ public class Yakumo {
     /**
      * @return the session
      */
-    public String getSession() {
-        return session;
-    }
-    boolean getReaction_flag()
-    {
-        return reaction_flag;
-    }
-    String getEcho()
-    {
-        return echo;
-    }
+   
 }
